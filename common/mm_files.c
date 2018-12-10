@@ -1,9 +1,9 @@
 /**
- * @file common.c
- * @brief Implementation of common functions for the AoC 2018
+ * @file mm_file.c
+ * @brief Implementation of file loading function.
  */
 
-#include "common.h"
+#include "mm_files.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -13,9 +13,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
-
-#include <errno.h>
-#include <stdio.h>
 
 char* mm_file_read(const char* fpath){
   struct stat statbuf;

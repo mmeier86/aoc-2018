@@ -23,15 +23,17 @@ check_header("unistd.h")
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake_modules/Unity.cmake)
 
-add_library(aoc_common STATIC common.c)
+add_library(aoc_common STATIC
+  mm_files.c
+  )
 target_include_directories(aoc_common
   PUBLIC ${CMAKE_CURRENT_LIST_DIR}
   )
 
-add_ut(common_ut
-  ${CMAKE_CURRENT_LIST_DIR}/test_common.c
+add_ut(mm_files_ut
+  ${CMAKE_CURRENT_LIST_DIR}/test_mm_files.c
   T_DIR ${CMAKE_CURRENT_LIST_DIR}/testfiles
   )
-link_ut(common_ut
+link_ut(mm_files_ut
   PRIVATE aoc_common
 )

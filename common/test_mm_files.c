@@ -1,10 +1,10 @@
 /**
- * @file test_common.c
- * @brief UTs for common code in AoC 2018
+ * @file test_mm_files.c
+ * @brief UTs mm_files.c
  */
 
 #include <unity.h>
-#include "common.h"
+#include "mm_files.h"
 
 #include <errno.h>
 #include <stdio.h>
