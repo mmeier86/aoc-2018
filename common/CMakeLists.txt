@@ -10,6 +10,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 string(APPEND CMAKE_C_FLAGS_DEBUG " -Wall -Wextra -Werror")
 
 include(CheckIncludeFile)
+include(CheckSymbolExists)
 function(check_header HEADER)
   check_include_file(${HEADER} HAS_HEADER)
   if(NOT HAS_HEADER)
@@ -21,10 +22,19 @@ check_header("sys/stat.h")
 check_header("fcntl.h")
 check_header("unistd.h")
 
+check_symbol_exists(strtok_r "string.h" HAS_STRTOK)
+if(NOT HAS_STRTOK)
+  message(FATAL_ERROR "string.h does not provide strtok_r.\n\
+Please note that this program uses Linux APIs."
+    )
+endif()
+
+
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake_modules/Unity.cmake)
 
 add_library(aoc_common STATIC
   mm_files.c
+  tokenizer.c
   )
 target_include_directories(aoc_common
   PUBLIC ${CMAKE_CURRENT_LIST_DIR}
@@ -35,5 +45,11 @@ add_ut(mm_files_ut
   T_DIR ${CMAKE_CURRENT_LIST_DIR}/testfiles
   )
 link_ut(mm_files_ut
+  PRIVATE aoc_common
+)
+add_ut(tokenizer_ut
+  ${CMAKE_CURRENT_LIST_DIR}/test_tokenizer.c
+  )
+link_ut(tokenizer_ut
   PRIVATE aoc_common
 )
