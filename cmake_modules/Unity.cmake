@@ -30,7 +30,8 @@ if(UNITTESTS_ENABLED)
 
   macro(add_ut t_name t_file)
     cmake_parse_arguments(ADDUT "" "T_DIR" "" ${ARGN})
-    add_executable(${t_name} ${t_file})
+    add_executable(${t_name} ${t_file} ${ADDUT_UNPARSED_ARGUMENTS})
+    target_compile_definitions(${t_name} PRIVATE UNITTESTS_ENABLED)
     target_link_libraries(${t_name} PRIVATE unity::unity)
     add_test(NAME ${t_name}
       COMMAND ${t_name} ${ADDUT_T_DIR}

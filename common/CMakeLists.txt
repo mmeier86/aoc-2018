@@ -42,14 +42,15 @@ target_include_directories(aoc_common
 
 add_ut(mm_files_ut
   ${CMAKE_CURRENT_LIST_DIR}/test_mm_files.c
+  ${CMAKE_CURRENT_LIST_DIR}/mm_files.c
   T_DIR ${CMAKE_CURRENT_LIST_DIR}/testfiles_mm_files
   )
-link_ut(mm_files_ut
-  PRIVATE aoc_common
-)
 add_ut(tokenizer_ut
   ${CMAKE_CURRENT_LIST_DIR}/test_tokenizer.c
+  ${CMAKE_CURRENT_LIST_DIR}/tokenizer.c
   )
-link_ut(tokenizer_ut
-  PRIVATE aoc_common
-)
+add_ut(main_ut
+  ${CMAKE_CURRENT_LIST_DIR}/test_main.c
+  ${CMAKE_CURRENT_LIST_DIR}/main.c
+  T_DIR ${CMAKE_CURRENT_LIST_DIR}/testfiles_main
+  )
