@@ -29,12 +29,21 @@ Please note that this program uses Linux APIs."
     )
 endif()
 
+if(UNITTESTS_ENABLED)
+  check_symbol_exists(open_memstream "stdio.h" HAS_MEMSTREAM)
+  if(NOT HAS_MEMSTREAM)
+    message(FATAL_ERROR "stdio.h does not provide open_memstream.\n\
+Please note that this program uses Linux APIs."
+      )
+  endif()
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake_modules/Unity.cmake)
 
 add_library(aoc_common STATIC
   mm_files.c
   tokenizer.c
+  main.c
   )
 target_include_directories(aoc_common
   PUBLIC ${CMAKE_CURRENT_LIST_DIR}
@@ -52,5 +61,5 @@ add_ut(tokenizer_ut
 add_ut(main_ut
   ${CMAKE_CURRENT_LIST_DIR}/test_main.c
   ${CMAKE_CURRENT_LIST_DIR}/main.c
-  T_DIR ${CMAKE_CURRENT_LIST_DIR}/testfiles_main
+  ${CMAKE_CURRENT_LIST_DIR}/common_mocks.c
   )

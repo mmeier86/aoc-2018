@@ -8,6 +8,11 @@
 #include "mm_files.h"
 #include "tokenizer.h"
 
+// Tokenizer Mock
+struct tokintern{
+  unsigned id;
+};
+
 struct mock_mm_file_read_t{
   char* retval;
   char* param_1;

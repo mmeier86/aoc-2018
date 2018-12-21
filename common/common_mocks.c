@@ -17,11 +17,6 @@ struct mock_get_tokenizer_t* mock_get_tokenizer = NULL;
 struct mock_n_tok_t* mock_n_tok = NULL;
 struct mock_free_tok_t* mock_free_tok = NULL;
 
-// Tokenizer Mock
-struct tokintern{
-  unsigned id;
-};
-
 char* mm_file_read(const char* fpath){
   if(mock_mm_file_read == NULL){
     fprintf(stderr,"mm_file_read called but no mock set. Aborting.");
@@ -83,12 +78,6 @@ void free_tok(tok_t* tok){
     fprintf(stderr,"free_tok called but no mock set. Aborting.");
     abort();
   }
-  if(tok==NULL){
-    mock_free_tok->param_1 = tok;
-  }
-  else{
-    mock_free_tok->param_1 = malloc(sizeof(tok_t));
-    memcpy(mock_free_tok->param_1, tok, sizeof(tok_t));
-  }
+  mock_free_tok->param_1 = tok;
   mock_free_tok->callcount++;
 }
