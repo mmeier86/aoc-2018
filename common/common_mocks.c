@@ -31,7 +31,7 @@ char* mm_file_read(const char* fpath){
     mock_mm_file_read->param_1 = NULL;
   }
   else{
-    mock_mm_file_read->param_1 = malloc(strlen(fpath));
+    mock_mm_file_read->param_1 = malloc(strlen(fpath)+1);
     strcpy(mock_mm_file_read->param_1, fpath);
   }
   mock_mm_file_read->callcount++;
@@ -48,14 +48,14 @@ tok_t* get_tokenizer(char* s, char* delim){
     mock_get_tokenizer->param_1 = s;
   }
   else{
-    mock_get_tokenizer->param_1 = malloc(strlen(s));
+    mock_get_tokenizer->param_1 = malloc(strlen(s)+1);
     strcpy(mock_get_tokenizer->param_1, s);
   }
   if(delim==NULL){
     mock_get_tokenizer->param_2 = delim;
   }
   else{
-    mock_get_tokenizer->param_2 = malloc(strlen(delim));
+    mock_get_tokenizer->param_2 = malloc(strlen(delim)+1);
     strcpy(mock_get_tokenizer->param_2, delim);
   }
   mock_get_tokenizer->callcount++;
