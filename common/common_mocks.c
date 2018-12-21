@@ -10,18 +10,30 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct mock_mm_file_read_t* mock_mm_file_read = NULL;
 struct mock_get_tokenizer_t* mock_get_tokenizer = NULL;
 struct mock_n_tok_t* mock_n_tok = NULL;
 struct mock_free_tok_t* mock_free_tok = NULL;
 
+// Tokenizer Mock
+struct tokintern{
+  unsigned id;
+};
+
 char* mm_file_read(const char* fpath){
   if(mock_mm_file_read == NULL){
     fprintf(stderr,"mm_file_read called but no mock set. Aborting.");
     abort();
   }
-  mock_mm_file_read->param_1 = fpath;
+  if(fpath==NULL){
+    mock_mm_file_read->param_1 = NULL;
+  }
+  else{
+    mock_mm_file_read->param_1 = malloc(strlen(fpath));
+    strcpy(mock_mm_file_read->param_1, fpath);
+  }
   mock_mm_file_read->callcount++;
   errno = mock_mm_file_read->set_errno_to;
   return mock_mm_file_read->retval;
@@ -32,8 +44,20 @@ tok_t* get_tokenizer(char* s, char* delim){
     fprintf(stderr,"get_tokenizer called but no mock set. Aborting.");
     abort();
   }
-  mock_get_tokenizer->param_1 = s;
-  mock_get_tokenizer->param_2 = delim;
+  if(s==NULL){
+    mock_get_tokenizer->param_1 = s;
+  }
+  else{
+    mock_get_tokenizer->param_1 = malloc(strlen(s));
+    strcpy(mock_get_tokenizer->param_1, s);
+  }
+  if(delim==NULL){
+    mock_get_tokenizer->param_2 = delim;
+  }
+  else{
+    mock_get_tokenizer->param_2 = malloc(strlen(delim));
+    strcpy(mock_get_tokenizer->param_2, delim);
+  }
   mock_get_tokenizer->callcount++;
   return mock_get_tokenizer->retval;
 }
@@ -43,7 +67,13 @@ char* n_tok(tok_t* tok){
     fprintf(stderr,"n_tok called but no mock set. Aborting.");
     abort();
   }
-  mock_n_tok->param_1 = tok;
+  if(tok==NULL){
+    mock_n_tok->param_1 = tok;
+  }
+  else{
+    mock_n_tok->param_1 = malloc(sizeof(tok_t));
+    memcpy(mock_n_tok->param_1, tok, sizeof(tok_t));
+  }
   mock_n_tok->callcount++;
   return mock_n_tok->retval;
 }
@@ -53,6 +83,12 @@ void free_tok(tok_t* tok){
     fprintf(stderr,"free_tok called but no mock set. Aborting.");
     abort();
   }
-  mock_free_tok->param_1 = tok;
+  if(tok==NULL){
+    mock_free_tok->param_1 = tok;
+  }
+  else{
+    mock_free_tok->param_1 = malloc(sizeof(tok_t));
+    memcpy(mock_free_tok->param_1, tok, sizeof(tok_t));
+  }
   mock_free_tok->callcount++;
 }

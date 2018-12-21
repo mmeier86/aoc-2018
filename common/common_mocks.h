@@ -10,7 +10,7 @@
 
 struct mock_mm_file_read_t{
   char* retval;
-  const char* param_1;
+  char* param_1;
   int callcount;
   int set_errno_to;
 };
