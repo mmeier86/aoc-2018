@@ -5,10 +5,11 @@ include(ExternalProject)
 set(COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
 
 ExternalProject_Add(common-ext
-  SOURCE ${COMMON_DIR}
+  SOURCE_DIR ${COMMON_DIR}
   CMAKE_ARGS -DUNITTESTS_ENABLED=OFF -DCMAKE_BUILD_TYPE=Release
   CMAKE_GENERATOR ${CMAKE_GENERATOR}
   BUILD_BYPRODUCTS <BINARY_DIR>/libaoc_common.a
+  INSTALL_COMMAND ""
   )
 
 ExternalProject_Get_Property(common-ext binary_dir)
