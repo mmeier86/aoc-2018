@@ -44,6 +44,7 @@ add_library(aoc_common STATIC
   mm_files.c
   tokenizer.c
   main.c
+  aoc_err.c
   )
 target_include_directories(aoc_common
   PUBLIC ${CMAKE_CURRENT_LIST_DIR}
@@ -69,4 +70,8 @@ add_ut(main_integration_ut
   ${CMAKE_CURRENT_LIST_DIR}/mm_files.c
   ${CMAKE_CURRENT_LIST_DIR}/tokenizer.c
   T_DIR ${CMAKE_CURRENT_LIST_DIR}/testfiles_main_integration
+  )
+add_ut(aoc_err_ut
+  ${CMAKE_CURRENT_LIST_DIR}/test_aoc_err.c
+  ${CMAKE_CURRENT_LIST_DIR}/aoc_err.c
   )
