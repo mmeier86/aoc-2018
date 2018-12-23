@@ -3,6 +3,7 @@
  * @brief Tests for main.c
  */
 
+#include "aoc_err.h"
 #include "common_mocks.h"
 #include "main.h"
 
@@ -62,6 +63,10 @@ void setUp(void){
   mock_free_tok = malloc(sizeof(struct mock_free_tok_t));
   mock_free_tok->callcount = 0;
   mock_free_tok->param_1 = NULL;
+
+  mock_get_latest_aoc_err_msg = malloc(sizeof(struct mock_get_latest_aoc_err_msg_t));
+  mock_get_latest_aoc_err_msg->callcount = 0;
+  mock_get_latest_aoc_err_msg->retval = NULL;
 }
 
 void tearDown(void){
@@ -85,6 +90,7 @@ void tearDown(void){
   free(mock_n_tok);
 
   free(mock_free_tok);
+  free(mock_get_latest_aoc_err_msg);
 }
 
 void test_too_few_cli_args_prints_usage(void){
@@ -236,7 +242,7 @@ void test_func_result_printed(void){
   TEST_ASSERT_EQUAL_STRING("Foo, Bar!\n",stdout_data.streambuff);
 }
 
-void test_func_returns_null_aborts(void){
+void test_func_returns_null_error_printed(void){
   char* argv[] = {"main", "missing.txt"};
   int argc = 2;
   char* content = malloc(64);
@@ -246,6 +252,27 @@ void test_func_returns_null_aborts(void){
   tok.id = 15;
   mock_get_tokenizer->retval = &tok;
   func_retval = NULL;
+  mock_get_latest_aoc_err_msg->retval = malloc(64);
+  snprintf(mock_get_latest_aoc_err_msg->retval, 64, "Foo");
+  char* exp = "Error in AoC function call:\nFoo\n";
+  int res = aoc_main(argc, argv, empty_func);
+  fflush(stderr_ut);
+  TEST_ASSERT_EQUAL_INT(1,func_callcount);
+  TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
+  TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
+}
+
+void test_func_returns_null_no_error_msg_aborts(void){
+  char* argv[] = {"main", "missing.txt"};
+  int argc = 2;
+  char* content = malloc(64);
+  strcpy(content, "Hello, World!\n");
+  mock_mm_file_read->retval = content;
+  tok_t tok;
+  tok.id = 15;
+  mock_get_tokenizer->retval = &tok;
+  func_retval = NULL;
+  mock_get_latest_aoc_err_msg->retval = NULL;
   char* exp = "Error in AoC function call.\n";
   int res = aoc_main(argc, argv, empty_func);
   fflush(stderr_ut);
@@ -267,6 +294,7 @@ int main(void){
   RUN_TEST(test_tokenizer_handed_to_func);
   RUN_TEST(test_tokenizer_freed);
   RUN_TEST(test_func_result_printed);
-  RUN_TEST(test_func_returns_null_aborts);
+  RUN_TEST(test_func_returns_null_no_error_msg_aborts);
+  RUN_TEST(test_func_returns_null_error_printed);
   return UNITY_END();
 }

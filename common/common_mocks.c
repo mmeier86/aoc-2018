@@ -16,6 +16,7 @@ struct mock_mm_file_read_t* mock_mm_file_read = NULL;
 struct mock_get_tokenizer_t* mock_get_tokenizer = NULL;
 struct mock_n_tok_t* mock_n_tok = NULL;
 struct mock_free_tok_t* mock_free_tok = NULL;
+struct mock_get_latest_aoc_err_msg_t* mock_get_latest_aoc_err_msg = NULL;
 
 char* mm_file_read(const char* fpath){
   if(mock_mm_file_read == NULL){
@@ -80,4 +81,13 @@ void free_tok(tok_t* tok){
   }
   mock_free_tok->param_1 = tok;
   mock_free_tok->callcount++;
+}
+
+char* get_latest_aoc_err_msg(){
+  if(mock_get_latest_aoc_err_msg == NULL){
+    fprintf(stderr,"get_latest_aoc_err_msg called but no mock set. Aborting.");
+    abort();
+  }
+  mock_free_tok->callcount++;
+  return mock_get_latest_aoc_err_msg->retval;
 }

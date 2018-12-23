@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "aoc_err.h"
 #include "mm_files.h"
 #include "tokenizer.h"
 
@@ -45,3 +46,10 @@ struct mock_free_tok_t{
 };
 
 extern struct mock_free_tok_t* mock_free_tok;
+
+struct mock_get_latest_aoc_err_msg_t{
+  int callcount;
+  char* retval;
+};
+
+extern struct mock_get_latest_aoc_err_msg_t* mock_get_latest_aoc_err_msg;

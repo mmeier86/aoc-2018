@@ -69,6 +69,7 @@ add_ut(main_integration_ut
   ${CMAKE_CURRENT_LIST_DIR}/main.c
   ${CMAKE_CURRENT_LIST_DIR}/mm_files.c
   ${CMAKE_CURRENT_LIST_DIR}/tokenizer.c
+  ${CMAKE_CURRENT_LIST_DIR}/aoc_err.c
   T_DIR ${CMAKE_CURRENT_LIST_DIR}/testfiles_main_integration
   )
 add_ut(aoc_err_ut

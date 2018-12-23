@@ -5,6 +5,8 @@
 
 #include "main.h"
 
+#include "aoc_err.h"
+
 #include <unity.h>
 
 #include <errno.h>
@@ -21,16 +23,6 @@ struct memstream_t{
   char* streambuff;
   size_t streamsize;
 } stderr_data, stdout_data;
-
-char* third_line_func(tok_t* tok){
-  char* curr;
-  char* res = malloc(64);
-  for(int i = 0; i<3; i++){
-    curr = n_tok(tok);
-  }
-  strncpy(res, curr, 64);
-  return res;
-}
 
 char* get_file_path(const char* dir, const char* filename){
   size_t dirlen = strlen( dir );
@@ -62,6 +54,16 @@ void tearDown(void){
   free(stderr_data.streambuff);
 }
 
+char* third_line_func(tok_t* tok){
+  char* curr;
+  char* res = malloc(64);
+  for(int i = 0; i<3; i++){
+    curr = n_tok(tok);
+  }
+  strncpy(res, curr, 64);
+  return res;
+}
+
 void test_output_third_input_line(void){
   char* fpath = get_file_path(testdir, "four_lines.txt");
   int argc = 2;
@@ -73,6 +75,25 @@ void test_output_third_input_line(void){
   free(fpath);
 }
 
+char* erroneous_func(tok_t* tok){
+  (void)(tok);
+  set_aoc_err_msg("Foo!", EINVAL);
+  return NULL;
+}
+
+void test_output_erroneous_func(void){
+  char* fpath = get_file_path(testdir, "four_lines.txt");
+  int argc = 2;
+  char* argv[] = {"main", fpath};
+  char exp[1024];
+  snprintf(exp,1024,"Error in AoC function call:\nFoo!\n%s\n",strerror(EINVAL));
+  int res = aoc_main(argc, argv, erroneous_func);
+  fflush(stderr_ut);
+  TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
+  TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
+  free(fpath);
+}
+
 int main(int argc, char** argv){
   if( argc != 2 ){
     fprintf( stderr, "usage: %s TESTFILE_DIR", argv[0] );
@@ -81,5 +102,6 @@ int main(int argc, char** argv){
   testdir = argv[1];
   UNITY_BEGIN();
   RUN_TEST(test_output_third_input_line);
+  RUN_TEST(test_output_erroneous_func);
   return UNITY_END();
 }

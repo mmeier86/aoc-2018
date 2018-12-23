@@ -5,8 +5,9 @@
 
 #include "main.h"
 
-#include "mm_files.h"
+#include "aoc_err.h"
 #include "aoc_streams.h"
+#include "mm_files.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -44,7 +45,15 @@ int aoc_main(int argc, char** argv, char* (*dayfunc)(tok_t*)){
   free_tok(tok);
   free(content);
   if(res == NULL){
-    fprintf(STDERR_STREAM, "Error in AoC function call.\n");
+    fprintf(STDERR_STREAM, "Error in AoC function call");
+    char* latest_error = get_latest_aoc_err_msg();
+    if(latest_error == NULL){
+      fprintf(STDERR_STREAM, ".\n");
+    }
+    else{
+      fprintf(STDERR_STREAM,":\n%s\n",latest_error);
+      free(latest_error);
+    }
     return EXIT_FAILURE;
   }
   fprintf(STDOUT_STREAM, "%s\n", res);
