@@ -6,21 +6,12 @@
 #include "main.h"
 
 #include "mm_files.h"
+#include "aoc_streams.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef UNITTESTS_ENABLED
-extern FILE* stdout_ut;
-extern FILE* stderr_ut;
-#define STDOUT_STREAM stdout_ut
-#define STDERR_STREAM stderr_ut
-#else
-#define STDOUT_STREAM stdout
-#define STDERR_STREAM stderr
-#endif
 
 static const char* usage = "Usage: %s INPUT_FILE\n";
 
