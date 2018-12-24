@@ -84,6 +84,52 @@ void test_tok_multi_trailing_newlines(void){
   free_tok(tokenizer);
 }
 
+void test_tok_reset_before_first_ntok_call(void){
+  char in[] = "Hello,\nWorld.\nfoo\nbar\n";
+  tok_t* tokenizer = get_tokenizer(in, "\n");
+  TEST_ASSERT_NOT_NULL(tokenizer);
+  reset_tok(tokenizer);
+  char* res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("Hello,",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("World.",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("foo",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("bar",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_NULL(res);
+  free_tok(tokenizer);
+}
+
+void test_tok_reset_after_last_ntok_call(void){
+  char in[] = "Hello,\nWorld.\nfoo\nbar\n";
+  tok_t* tokenizer = get_tokenizer(in, "\n");
+  TEST_ASSERT_NOT_NULL(tokenizer);
+  char* res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("Hello,",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("World.",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("foo",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("bar",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_NULL(res);
+  reset_tok(tokenizer);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("Hello,",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("World.",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("foo",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_EQUAL_STRING("bar",res);
+  res = n_tok(tokenizer);
+  TEST_ASSERT_NULL(res);
+  free_tok(tokenizer);
+}
+
 int main(void){
   UNITY_BEGIN();
   RUN_TEST(test_create_empty_str_returns_null);
@@ -94,5 +140,7 @@ int main(void){
   RUN_TEST(test_tok_single_char_prepend_delim_returns_char);
   RUN_TEST(test_tok_multi);
   RUN_TEST(test_tok_multi_trailing_newlines);
+  RUN_TEST(test_tok_reset_before_first_ntok_call);
+  RUN_TEST(test_tok_reset_after_last_ntok_call);
   return UNITY_END();
 }
