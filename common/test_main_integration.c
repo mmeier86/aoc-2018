@@ -66,9 +66,9 @@ char* third_line_func(tok_t* tok){
 
 void test_output_third_input_line(void){
   char* fpath = get_file_path(testdir, "four_lines.txt");
-  int argc = 2;
-  char* argv[] = {"main", fpath};
-  int res = aoc_main(argc, argv, third_line_func);
+  int argc = 3;
+  char* argv[] = {"main", "1", fpath};
+  int res = aoc_main(argc, argv, third_line_func, NULL);
   fflush(stdout_ut);
   TEST_ASSERT_EQUAL_INT(EXIT_SUCCESS,res);
   TEST_ASSERT_EQUAL_STRING("Hello, World!\n",stdout_data.streambuff);
@@ -83,11 +83,11 @@ char* erroneous_func(tok_t* tok){
 
 void test_output_erroneous_func(void){
   char* fpath = get_file_path(testdir, "four_lines.txt");
-  int argc = 2;
-  char* argv[] = {"main", fpath};
+  int argc = 3;
+  char* argv[] = {"main", "1", fpath};
   char exp[1024];
   snprintf(exp,1024,"Error in AoC function call:\nFoo!\n%s\n",strerror(EINVAL));
-  int res = aoc_main(argc, argv, erroneous_func);
+  int res = aoc_main(argc, argv, erroneous_func, NULL);
   fflush(stderr_ut);
   TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
   TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);

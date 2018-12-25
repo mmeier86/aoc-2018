@@ -14,20 +14,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const char* usage = "Usage: %s INPUT_FILE\n";
+static const char* usage = "Usage: %s 1|2 INPUT_FILE\n";
+static const char* parterr = "Part %s requested but no part %s function provided.\n";
 
-int aoc_main(int argc, char** argv, char* (*dayfunc)(tok_t*)){
-  if(argc < 2){
-    fprintf(STDOUT_STREAM, "Too few arguments.\n");
-    fprintf(STDOUT_STREAM, usage, argv[0]);
-    return EXIT_FAILURE;
-  }
-  else if(argc > 2){
-    fprintf(STDOUT_STREAM, "Too many arguments.\n");
-    fprintf(STDOUT_STREAM, usage, argv[0]);
-    return EXIT_FAILURE;
-  }
-  const char* fpath = argv[1];
+int exec_dayfunc(const char* fpath, char* (*dayfunc)(tok_t*)){
   char* content = mm_file_read(fpath);
   int error = errno;
   if(content == NULL){
@@ -59,4 +49,38 @@ int aoc_main(int argc, char** argv, char* (*dayfunc)(tok_t*)){
   fprintf(STDOUT_STREAM, "%s\n", res);
   free(res);
   return EXIT_SUCCESS;
+}
+
+int aoc_main(int argc, char** argv, char* (*p1func)(tok_t*),
+             char* (*p2func)(tok_t*)){
+  (void)(p2func);
+  if(argc < 3){
+    fprintf(STDOUT_STREAM, "Too few arguments.\n");
+    fprintf(STDOUT_STREAM, usage, argv[0]);
+    return EXIT_FAILURE;
+  }
+  else if(argc > 3){
+    fprintf(STDOUT_STREAM, "Too many arguments.\n");
+    fprintf(STDOUT_STREAM, usage, argv[0]);
+    return EXIT_FAILURE;
+  }
+  const char* part = argv[1];
+  const char* fpath = argv[2];
+  char* (*dayfunc)(tok_t*);
+  if(strcmp("1", part) == 0){
+    dayfunc = p1func;
+  }
+  else if(strcmp("2", part) == 0){
+    dayfunc = p2func;
+  }
+  else{
+    fprintf(STDERR_STREAM, "\"%s\" is an invalid part number. Choose 1 or 2.\n",
+            part);
+    return EXIT_FAILURE;
+  }
+  if(dayfunc == NULL){
+    fprintf(STDERR_STREAM, parterr, part, part);
+    return EXIT_FAILURE;
+  }
+  return exec_dayfunc(fpath, dayfunc);
 }

@@ -96,55 +96,95 @@ void tearDown(void){
 void test_too_few_cli_args_prints_usage(void){
   char* argv[] = {"main"};
   int argc = 1;
-  const char* exp = "Too few arguments.\nUsage: main INPUT_FILE\n";
-  int res = aoc_main(argc, argv, empty_func);
+  const char* exp = "Too few arguments.\nUsage: main 1|2 INPUT_FILE\n";
+  int res = aoc_main(argc, argv, empty_func, NULL);
   fflush(stdout_ut);
   TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
   TEST_ASSERT_EQUAL_STRING(exp,stdout_data.streambuff);
 }
 
 void test_too_many_cli_args_prints_usage(void){
-  char* argv[] = {"main","foo","bar"};
-  int argc = 3;
-  const char* exp = "Too many arguments.\nUsage: main INPUT_FILE\n";
-  int res = aoc_main(argc, argv, empty_func);
+  char* argv[] = {"main","1","foo","bar"};
+  int argc = 4;
+  const char* exp = "Too many arguments.\nUsage: main 1|2 INPUT_FILE\n";
+  int res = aoc_main(argc, argv, empty_func, NULL);
   fflush(stdout_ut);
   TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
   TEST_ASSERT_EQUAL_STRING(exp,stdout_data.streambuff);
   free(func_retval);
 }
 
+void test_part_1_requested_but_null_prints_error(void){
+  char* argv[] = {"main","1","file.txt"};
+  int argc = 3;
+  const char* exp = "Part 1 requested but no part 1 function provided.\n";
+  int res = aoc_main(argc, argv, NULL, empty_func);
+  fflush(stderr_ut);
+  TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
+  TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
+}
+
+void test_part_2_requested_but_null_prints_error(void){
+  char* argv[] = {"main","2","file.txt"};
+  int argc = 3;
+  const char* exp = "Part 2 requested but no part 2 function provided.\n";
+  int res = aoc_main(argc, argv, empty_func, NULL);
+  fflush(stderr_ut);
+  TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
+  TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
+}
+
+void test_both_part_funcs_null_prints_error(void){
+  char* argv[] = {"main","2","file.txt"};
+  int argc = 3;
+  const char* exp = "Part 2 requested but no part 2 function provided.\n";
+  int res = aoc_main(argc, argv, NULL, NULL);
+  fflush(stderr_ut);
+  TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
+  TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
+}
+
+void test_invalid_part_number_supplied(void){
+  char* argv[] = {"main","3","file.txt"};
+  int argc = 3;
+  const char* exp = "\"3\" is an invalid part number. Choose 1 or 2.\n";
+  int res = aoc_main(argc, argv, NULL, NULL);
+  fflush(stderr_ut);
+  TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
+  TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
+}
+
 void test_file_read_gets_unchanged_path(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
-  aoc_main(argc, argv, empty_func);
+  aoc_main(argc, argv, empty_func, NULL);
   TEST_ASSERT_EQUAL_STRING("missing.txt",mock_mm_file_read->param_1);
   TEST_ASSERT_EQUAL_INT(1,mock_mm_file_read->callcount);
 }
 
 void test_file_missing_error_printed(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char exp[1024] = "Error loading input: ";
   snprintf(exp, 1024, "Error loading input from missing.txt: %s\n",
            strerror(ENOENT));
   mock_mm_file_read->retval = NULL;
   mock_mm_file_read->set_errno_to = ENOENT;
-  aoc_main(argc, argv, empty_func);
+  aoc_main(argc, argv, empty_func, NULL);
   fflush(stderr_ut);
   TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
   TEST_ASSERT_EQUAL_INT(1,mock_mm_file_read->callcount);
 }
 
 void test_file_loading_error_aborts(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   mock_mm_file_read->retval = NULL;
   mock_mm_file_read->set_errno_to = ENOENT;
-  int res = aoc_main(argc, argv, empty_func);
+  int res = aoc_main(argc, argv, empty_func, NULL);
   TEST_ASSERT_EQUAL_INT(EXIT_FAILURE, res);
   TEST_ASSERT_EQUAL_INT(1,mock_mm_file_read->callcount);
   TEST_ASSERT_EQUAL_INT(0,mock_get_tokenizer->callcount);
@@ -153,41 +193,41 @@ void test_file_loading_error_aborts(void){
 }
 
 void test_tokenizer_gets_string_from_file(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   tok_t tok;
   mock_mm_file_read->retval = content;
   mock_get_tokenizer->retval = &tok;
-  aoc_main(argc, argv, empty_func);
+  aoc_main(argc, argv, empty_func, NULL);
   TEST_ASSERT_EQUAL_INT(1,mock_get_tokenizer->callcount);
   TEST_ASSERT_EQUAL_STRING("Hello, World!\n",mock_get_tokenizer->param_1);
   TEST_ASSERT_EQUAL_STRING("\n",mock_get_tokenizer->param_2);
 }
 
 void test_tokenizer_failure_error_printed(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char exp[] = "Error initializing input tokenizer.\n";
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
   mock_get_tokenizer->retval = NULL;
-  aoc_main(argc, argv, empty_func);
+  aoc_main(argc, argv, empty_func, NULL);
   fflush(stderr_ut);
   TEST_ASSERT_EQUAL_STRING(exp,stderr_data.streambuff);
   TEST_ASSERT_EQUAL_INT(1,mock_get_tokenizer->callcount);
 }
 
 void test_tokenizer_failure_aborts(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
   mock_get_tokenizer->retval = NULL;
-  int res = aoc_main(argc, argv, empty_func);
+  int res = aoc_main(argc, argv, empty_func, NULL);
   TEST_ASSERT_EQUAL_INT(EXIT_FAILURE, res);
   TEST_ASSERT_EQUAL_INT(1,mock_get_tokenizer->callcount);
   TEST_ASSERT_EQUAL_INT(0,mock_n_tok->callcount);
@@ -195,38 +235,38 @@ void test_tokenizer_failure_aborts(void){
 }
 
 void test_tokenizer_handed_to_func(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
   tok_t tok;
   tok.id = 15;
   mock_get_tokenizer->retval = &tok;
-  aoc_main(argc, argv, empty_func);
+  aoc_main(argc, argv, empty_func, NULL);
   TEST_ASSERT_EQUAL_PTR(&tok,func_param);
   TEST_ASSERT_EQUAL_INT(tok.id, func_param->id);
   TEST_ASSERT_EQUAL_INT(1,func_callcount);
 }
 
 void test_tokenizer_freed(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
   tok_t tok;
   tok.id = 15;
   mock_get_tokenizer->retval = &tok;
-  aoc_main(argc, argv, empty_func);
+  aoc_main(argc, argv, empty_func, NULL);
   TEST_ASSERT_EQUAL_PTR(&tok,mock_free_tok->param_1);
   TEST_ASSERT_EQUAL_INT(tok.id, mock_free_tok->param_1->id);
   TEST_ASSERT_EQUAL_INT(1,func_callcount);
 }
 
 void test_func_result_printed(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
@@ -235,16 +275,58 @@ void test_func_result_printed(void){
   mock_get_tokenizer->retval = &tok;
   func_retval = malloc(64);
   strcpy(func_retval, "Foo, Bar!");
-  int res = aoc_main(argc, argv, empty_func);
+  int res = aoc_main(argc, argv, empty_func, NULL);
   fflush(stdout_ut);
   TEST_ASSERT_EQUAL_INT(1,func_callcount);
   TEST_ASSERT_EQUAL_INT(EXIT_SUCCESS,res);
   TEST_ASSERT_EQUAL_STRING("Foo, Bar!\n",stdout_data.streambuff);
 }
 
+char* part1_mock(tok_t* tok){
+  (void)(tok);
+  char* res = strdup("This is part 1.");
+  return res;
+}
+
+char* part2_mock(tok_t* tok){
+  (void)(tok);
+  char* res = strdup("This is part 2.");
+  return res;
+}
+
+void test_part_1_requested_executes_part_1_func(void){
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
+  char* content = malloc(64);
+  strcpy(content, "Hello, World!\n");
+  mock_mm_file_read->retval = content;
+  tok_t tok;
+  tok.id = 15;
+  mock_get_tokenizer->retval = &tok;
+  int res = aoc_main(argc, argv, part1_mock, part2_mock);
+  fflush(stdout_ut);
+  TEST_ASSERT_EQUAL_INT(EXIT_SUCCESS,res);
+  TEST_ASSERT_EQUAL_STRING("This is part 1.\n",stdout_data.streambuff);
+}
+
+void test_part_2_requested_executes_part_2_func(void){
+  char* argv[] = {"main", "2", "missing.txt"};
+  int argc = 3;
+  char* content = malloc(64);
+  strcpy(content, "Hello, World!\n");
+  mock_mm_file_read->retval = content;
+  tok_t tok;
+  tok.id = 15;
+  mock_get_tokenizer->retval = &tok;
+  int res = aoc_main(argc, argv, part1_mock, part2_mock);
+  fflush(stdout_ut);
+  TEST_ASSERT_EQUAL_INT(EXIT_SUCCESS,res);
+  TEST_ASSERT_EQUAL_STRING("This is part 2.\n",stdout_data.streambuff);
+}
+
 void test_func_returns_null_error_printed(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
@@ -255,7 +337,7 @@ void test_func_returns_null_error_printed(void){
   mock_get_latest_aoc_err_msg->retval = malloc(64);
   snprintf(mock_get_latest_aoc_err_msg->retval, 64, "Foo");
   char* exp = "Error in AoC function call:\nFoo\n";
-  int res = aoc_main(argc, argv, empty_func);
+  int res = aoc_main(argc, argv, empty_func, NULL);
   fflush(stderr_ut);
   TEST_ASSERT_EQUAL_INT(1,func_callcount);
   TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
@@ -263,8 +345,8 @@ void test_func_returns_null_error_printed(void){
 }
 
 void test_func_returns_null_no_error_msg_aborts(void){
-  char* argv[] = {"main", "missing.txt"};
-  int argc = 2;
+  char* argv[] = {"main", "1", "missing.txt"};
+  int argc = 3;
   char* content = malloc(64);
   strcpy(content, "Hello, World!\n");
   mock_mm_file_read->retval = content;
@@ -274,7 +356,7 @@ void test_func_returns_null_no_error_msg_aborts(void){
   func_retval = NULL;
   mock_get_latest_aoc_err_msg->retval = NULL;
   char* exp = "Error in AoC function call.\n";
-  int res = aoc_main(argc, argv, empty_func);
+  int res = aoc_main(argc, argv, empty_func, NULL);
   fflush(stderr_ut);
   TEST_ASSERT_EQUAL_INT(1,func_callcount);
   TEST_ASSERT_EQUAL_INT(EXIT_FAILURE,res);
@@ -285,6 +367,10 @@ int main(void){
   UNITY_BEGIN();
   RUN_TEST(test_too_few_cli_args_prints_usage);
   RUN_TEST(test_too_many_cli_args_prints_usage);
+  RUN_TEST(test_part_1_requested_but_null_prints_error);
+  RUN_TEST(test_part_2_requested_but_null_prints_error);
+  RUN_TEST(test_both_part_funcs_null_prints_error);
+  RUN_TEST(test_invalid_part_number_supplied);
   RUN_TEST(test_file_read_gets_unchanged_path);
   RUN_TEST(test_file_missing_error_printed);
   RUN_TEST(test_file_loading_error_aborts);
@@ -294,6 +380,8 @@ int main(void){
   RUN_TEST(test_tokenizer_handed_to_func);
   RUN_TEST(test_tokenizer_freed);
   RUN_TEST(test_func_result_printed);
+  RUN_TEST(test_part_1_requested_executes_part_1_func);
+  RUN_TEST(test_part_2_requested_executes_part_2_func);
   RUN_TEST(test_func_returns_null_no_error_msg_aborts);
   RUN_TEST(test_func_returns_null_error_printed);
   return UNITY_END();

@@ -7,4 +7,5 @@
 
 #include "tokenizer.h"
 
-int aoc_main(int argc, char** argv, char* (*dayfunc)(tok_t*));
+int aoc_main(int argc, char** argv, char* (*p1func)(tok_t*),
+             char* (*p2func)(tok_t*));
