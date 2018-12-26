@@ -9,5 +9,5 @@
 #include <stddef.h>
 
 int main(int argc, char** argv){
-  return aoc_main(argc, argv, box_checksum, NULL);
+  return aoc_main(argc, argv, box_checksum, similar_id);
 }

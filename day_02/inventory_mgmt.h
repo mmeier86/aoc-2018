@@ -6,3 +6,5 @@
 #include "tokenizer.h"
 
 char* box_checksum(tok_t* tok);
+
+char* similar_id(tok_t* tok);

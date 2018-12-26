@@ -92,3 +92,11 @@ It is called in the form `aoc_main(argc, argv, func_part1, func_part2)`. Then it
   * Build: `cd day_01 && mkdir build && cmake .. && make day_01`
   * UT: `cd day_01 && mkdir build && cmake -DUNITTESTS_ENABLED=ON .. && make check`
 
+### Day 02 ###
+
+  * Directory: `day_02/`
+  * Task: https://adventofcode.com/2018/day/2
+  * Input: `day_02/input.txt`
+  * Build: `cd day_02 && mkdir build && cmake .. && make day_02`
+  * UT: `cd day_02 && mkdir build && cmake -DUNITTESTS_ENABLED=ON .. && make check`
+
