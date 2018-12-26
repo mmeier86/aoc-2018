@@ -7,5 +7,5 @@
 #include "main.h"
 
 int main(int argc, char** argv){
-  return aoc_main(argc, argv, compute_freq);
+  return aoc_main(argc, argv, compute_freq, get_first_repetition);
 }

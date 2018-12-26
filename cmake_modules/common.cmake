@@ -25,3 +25,11 @@ target_link_libraries(common INTERFACE common-imp)
 target_include_directories(common INTERFACE
   ${COMMON_DIR}
   )
+
+include(CheckIncludeFile)
+function(check_header HEADER)
+  check_include_file(${HEADER} HAS_HEADER)
+  if(NOT HAS_HEADER)
+    message(FATAL_ERROR "Could not file ${HEADER}.\nPlease note that this program uses Linux APIs.")
+  endif()
+endfunction()

@@ -6,3 +6,5 @@
 #include "tokenizer.h"
 
 char* compute_freq(tok_t* tok);
+
+char* get_first_repetition(tok_t* tok);
