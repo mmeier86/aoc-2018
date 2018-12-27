@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int parse_claim(char* in, claim_t* claim){
   int res = sscanf(in, "#%*d @ %u,%u: %ux%u",
@@ -56,5 +57,38 @@ char* cloth_slicing(tok_t* tok){
     set_aoc_err_msg("Tokenizer is empty.", 0);
     return NULL;
   }
-  return NULL;
+  int num_claims = tok_count(tok);
+  claim_t* claims = parse_all_claims(tok);
+  if(claims == NULL){
+    return NULL;
+  }
+  unsigned* cloth = malloc(1000*1000*sizeof(unsigned));
+  memset(cloth,0,1000*1000*sizeof(unsigned));
+  claim_t* curr = claims;
+  for(int i = 0; i<num_claims; i++){
+    for(unsigned x = curr->startx*1000; x<curr->startx*1000+curr->lengthx*1000;
+        x+=1000){
+      for(unsigned y = curr->starty; y<curr->starty+curr->lengthy; y++){
+        cloth[x+y]++;
+      }
+    }
+    curr++;
+  }
+  free(claims);
+  unsigned overlaps = 0;
+  for(unsigned i = 0; i<1000*1000; i++){
+    if(cloth[i]>1){
+      overlaps++;
+    }
+  }
+  unsigned temp = overlaps;
+  unsigned count = 0;
+  while(temp != 0){
+    temp /= 10u;
+    count++;
+  }
+  char* res = malloc(count+2);
+  snprintf(res,count+2, "%u",overlaps);
+  free(cloth);
+  return res;
 }
