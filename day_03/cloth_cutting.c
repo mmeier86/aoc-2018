@@ -14,13 +14,14 @@
 #include <string.h>
 
 int parse_claim(char* in, claim_t* claim){
-  int res = sscanf(in, "#%*d @ %u,%u: %ux%u",
+  int res = sscanf(in, "#%u @ %u,%u: %ux%u",
+                   &claim->id,
                    &claim->startx,
                    &claim->starty,
                    &claim->lengthx,
                    &claim->lengthy
                    );
-  return res == 4 ? 0 : -1;
+  return res == 5 ? 0 : -1;
 }
 
 claim_t* parse_all_claims(tok_t* tok){

@@ -6,6 +6,7 @@
 #include "tokenizer.h"
 
 struct claim{
+  unsigned id;
   unsigned startx;
   unsigned starty;
   unsigned lengthx;

@@ -34,6 +34,7 @@ void test_parse_claims_parse_single(void){
   char in[] = "#123 @ 3,2: 5x4";
   tok_t* tok = get_tokenizer(in, "\n");
   claim_t* res = parse_all_claims(tok);
+  TEST_ASSERT_EQUAL_UINT(123u, res[0].id);
   TEST_ASSERT_EQUAL_UINT(3u, res[0].startx);
   TEST_ASSERT_EQUAL_UINT(2u, res[0].starty);
   TEST_ASSERT_EQUAL_UINT(5u, res[0].lengthx);
@@ -46,14 +47,17 @@ void test_parse_claims_aoc_example(void){
   char in[] = "#1 @ 1,3: 4x4\n#2 @ 3,1: 4x4\n#3 @ 5,5: 2x2";
   tok_t* tok = get_tokenizer(in, "\n");
   claim_t* res = parse_all_claims(tok);
+  TEST_ASSERT_EQUAL_UINT(1u, res[0].id);
   TEST_ASSERT_EQUAL_UINT(1u, res[0].startx);
   TEST_ASSERT_EQUAL_UINT(3u, res[0].starty);
   TEST_ASSERT_EQUAL_UINT(4u, res[0].lengthx);
   TEST_ASSERT_EQUAL_UINT(4u, res[0].lengthy);
+  TEST_ASSERT_EQUAL_UINT(2u, res[1].id);
   TEST_ASSERT_EQUAL_UINT(3u, res[1].startx);
   TEST_ASSERT_EQUAL_UINT(1u, res[1].starty);
   TEST_ASSERT_EQUAL_UINT(4u, res[1].lengthx);
   TEST_ASSERT_EQUAL_UINT(4u, res[1].lengthy);
+  TEST_ASSERT_EQUAL_UINT(3u, res[2].id);
   TEST_ASSERT_EQUAL_UINT(5u, res[2].startx);
   TEST_ASSERT_EQUAL_UINT(5u, res[2].starty);
   TEST_ASSERT_EQUAL_UINT(2u, res[2].lengthx);
