@@ -9,5 +9,5 @@
 #include <stddef.h>
 
 int main(int argc, char** argv){
-  return aoc_main(argc, argv, cloth_slicing, NULL);
+  return aoc_main(argc, argv, cloth_slicing, find_valid_claim);
 }

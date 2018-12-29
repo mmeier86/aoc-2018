@@ -18,3 +18,5 @@ typedef struct claim claim_t;
 claim_t* parse_all_claims(tok_t* tok);
 
 char* cloth_slicing(tok_t* tok);
+
+char* find_valid_claim(tok_t* tok);

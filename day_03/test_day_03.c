@@ -101,7 +101,7 @@ void test_part1_two_claims_without_overlap_reports_zero_overlap(void){
   tok_t* tok = get_tokenizer(in, "\n");
   char* res = cloth_slicing(tok);
   TEST_ASSERT_EQUAL_STRING("0",res);
-  free(tok);
+  free_tok(tok);
   free(res);
 }
 
@@ -110,7 +110,7 @@ void test_part1_two_claims_one_overlap_reports_one_overlap(void){
   tok_t* tok = get_tokenizer(in, "\n");
   char* res = cloth_slicing(tok);
   TEST_ASSERT_EQUAL_STRING("1",res);
-  free(tok);
+  free_tok(tok);
   free(res);
 }
 
@@ -119,7 +119,7 @@ void test_part1_two_claims_four_overlaps_reports_four_overlaps(void){
   tok_t* tok = get_tokenizer(in, "\n");
   char* res = cloth_slicing(tok);
   TEST_ASSERT_EQUAL_STRING("4",res);
-  free(tok);
+  free_tok(tok);
   free(res);
 }
 
@@ -128,7 +128,55 @@ void test_part1_aoc_example(void){
   tok_t* tok = get_tokenizer(in, "\n");
   char* res = cloth_slicing(tok);
   TEST_ASSERT_EQUAL_STRING("4",res);
-  free(tok);
+  free_tok(tok);
+  free(res);
+}
+
+void test_part2_tok_null_returns_null(void){
+  char* res = find_valid_claim(NULL);
+  TEST_ASSERT_NULL(res);
+  char* err = get_latest_aoc_err_msg();
+  TEST_ASSERT_EQUAL_STRING("Tokenizer is NULL.", err);
+  free(err);
+}
+
+void test_part2_empty_tok_returns_null(void){
+  char in[] = "\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  char* res = find_valid_claim(tok);
+  TEST_ASSERT_NULL(res);
+  char* err = get_latest_aoc_err_msg();
+  TEST_ASSERT_EQUAL_STRING("Tokenizer is empty.", err);
+  free(err);
+  free_tok(tok);
+}
+
+void test_part2_failed_parse_leads_to_abort_and_sets_error_msg(void){
+  char in[] = "#1 @ 1aswe,3: 4x4";
+  tok_t* tok = get_tokenizer(in, "\n");
+  char* res = find_valid_claim(tok);
+  TEST_ASSERT_NULL(res);
+  char* error = get_latest_aoc_err_msg();
+  TEST_ASSERT_EQUAL_STRING("Error while parsing \"#1 @ 1aswe,3: 4x4\".",error);
+  free_tok(tok);
+  free(error);
+}
+
+void test_part2_aoc_example(void){
+  char in[] = "#1 @ 1,3: 4x4\n#2 @ 3,1: 4x4\n#3 @ 5,5: 2x2";
+  tok_t* tok = get_tokenizer(in, "\n");
+  char* res = find_valid_claim(tok);
+  TEST_ASSERT_EQUAL_STRING("3",res);
+  free_tok(tok);
+  free(res);
+}
+
+void test_part2_overlap_in_middle(void){
+  char in[] = "#1 @ 1,3: 4x4\n#2 @ 3,1: 4x4\n#3 @ 5,4: 2x2\n#4 @ 10,10: 2x2\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  char* res = find_valid_claim(tok);
+  TEST_ASSERT_EQUAL_STRING("4",res);
+  free_tok(tok);
   free(res);
 }
 
@@ -144,5 +192,10 @@ int main(void){
   RUN_TEST(test_part1_two_claims_one_overlap_reports_one_overlap);
   RUN_TEST(test_part1_two_claims_four_overlaps_reports_four_overlaps);
   RUN_TEST(test_part1_aoc_example);
+  RUN_TEST(test_part2_tok_null_returns_null);
+  RUN_TEST(test_part2_empty_tok_returns_null);
+  RUN_TEST(test_part2_failed_parse_leads_to_abort_and_sets_error_msg);
+  RUN_TEST(test_part2_aoc_example);
+  RUN_TEST(test_part2_overlap_in_middle);
   return UNITY_END();
 }
