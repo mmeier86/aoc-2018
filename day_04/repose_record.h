@@ -9,7 +9,7 @@
 
 typedef enum event{START, ASLEEP, AWAKE} event_t;
 
-typedef struct entry{
+typedef struct sched_entry{
   struct tm timestamp;
   unsigned guardid;
   event_t action;
