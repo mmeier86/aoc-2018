@@ -13,11 +13,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake_modules/Unity.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake_modules/common.cmake)
 
 check_header("search.h")
-include(CheckSymbolExists)
-check_symbol_exists(tdestroy "search.h" HAS_TDESTROY)
-if(NOT HAS_TDESTROY)
-  message(FATAL_ERROR "Could not find \"tdestroy\" function. Please note that this program needs the GNU extensions enabled.")
-endif()
+check_symbol(tdestroy "search.h")
 
 add_library(chronal_calibration
   ${CMAKE_CURRENT_LIST_DIR}/chronal_calibration.c

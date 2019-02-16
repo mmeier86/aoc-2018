@@ -13,16 +13,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake_modules/Unity.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake_modules/common.cmake)
 
 check_header(regex.h)
-include(CheckSymbolExists)
-check_symbol_exists(strptime "time.h" HAS_STRPTIME)
-if(NOT HAS_STRPTIME)
-  message(FATAL_ERROR "Could not find \"strptime\" function. Please note that this program needs the GNU extensions enabled.")
-endif()
+check_symbol(strptime "time.h")
 check_header(search.h)
-check_symbol_exists(tdestroy "search.h" HAS_TDESTROY)
-if(NOT HAS_TDESTROY)
-  message(FATAL_ERROR "Could not find \"tdestroy\" function. Please note that this program needs the GNU extensions enabled.")
-endif()
+check_symbol(tdestroy "search.h")
 
 add_library(repose_record
   ${CMAKE_CURRENT_LIST_DIR}/repose_record.c
