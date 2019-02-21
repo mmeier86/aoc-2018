@@ -80,6 +80,7 @@ void free_sched(sched_t* schedule){
   if(schedule != NULL){
     free(schedule->schedule);
     free(schedule->schedstore);
+    free(schedule->guardids);
     free(schedule);
   }
 }
@@ -135,6 +136,8 @@ int comp_entry_by_time(const void* first, const void* second){
   return 0;
 }
 
+static void* globbuf = NULL;
+
 void set_guard_ids(sched_t* sched){
   unsigned curr_guard;
   for(size_t i = 0; i<sched->entrycount; i++){
@@ -144,6 +147,16 @@ void set_guard_ids(sched_t* sched){
     else{
       sched->schedule[i]->guardid = curr_guard;
     }
+  }
+}
+
+void act_treewalk(const void* nodep, const VISIT which, const int depth){
+  (void)(depth);
+  if(globbuf != NULL
+     && (which == postorder || which == leaf)
+     ){
+    *((unsigned *)globbuf) = **((unsigned**) nodep);
+    globbuf = ((unsigned*) globbuf)+1;
   }
 }
 
@@ -174,9 +187,9 @@ sched_t* parse_schedule(tok_t* tok){
       return NULL;
     }
     if(curr_store_entry->action == START){
-      if(tfind(&curr_store_entry->guardid,guard_ids,comp_entry_guard_id) == NULL){
+      if(tfind(&curr_store_entry->guardid,&guard_ids,comp_entry_guard_id) == NULL){
         sched->guardcount++;
-        tsearch(&curr_store_entry->guardid,guard_ids,comp_entry_guard_id);
+        tsearch(&curr_store_entry->guardid,&guard_ids,comp_entry_guard_id);
       }
     }
     *curr_sched_entry = curr_store_entry;
@@ -184,7 +197,12 @@ sched_t* parse_schedule(tok_t* tok){
     curr_sched_entry++;
   }
   qsort(sched->schedule, sched->entrycount, sizeof(entry_t*), comp_entry_by_time);
+  sched->guardids = malloc(sizeof(unsigned)*sched->guardcount);
+  globbuf = sched->guardids;
+  twalk(guard_ids, act_treewalk);
+  globbuf = NULL;
   set_guard_ids(sched);
+  tdestroy(guard_ids,tree_destroy);
   return sched;
 }
 

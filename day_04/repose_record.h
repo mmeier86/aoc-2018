@@ -18,6 +18,7 @@ typedef struct sched_entry{
 typedef struct sched{
   unsigned entrycount;
   unsigned guardcount;
+  unsigned* guardids;
   entry_t* schedstore;
   entry_t** schedule;
 } sched_t;
