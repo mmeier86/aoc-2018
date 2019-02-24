@@ -305,5 +305,30 @@ char* most_asleep_guard(tok_t* tok){
     set_aoc_err_msg("Tokenizer is empty.", 0);
     return NULL;
   }
-  return NULL;
+  analyzed_sched_t* sched = analyze_schedule(tok);
+  if(sched == NULL){
+    return NULL;
+  }
+  guard_t* max_guard = sched->a_guards;
+  for(size_t i = 1; i < sched->n_guards; i++){
+    if(sched->a_guards[i].total_minutes_asleep > max_guard->total_minutes_asleep){
+      max_guard = &sched->a_guards[i];
+    }
+  }
+  unsigned max_minute = 0;
+  for(unsigned i = 0; i < 60; i++){
+    if(max_guard->minutes_asleep[i] > max_guard->minutes_asleep[max_minute]){
+      max_minute = i;
+    }
+  }
+  unsigned n = max_guard->id * max_minute;
+  unsigned counter = 0;
+  while(n != 0){
+    n /= 10;
+    counter++;
+  }
+  char* res = malloc(counter+2);
+  snprintf(res,counter+2,"%u",max_guard->id * max_minute);
+  free_analyzed_sched(sched);
+  return res;
 }
