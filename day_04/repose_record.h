@@ -23,10 +23,26 @@ typedef struct sched{
   entry_t** schedule;
 } sched_t;
 
+typedef struct guard{
+  unsigned id;
+  unsigned total_minutes_asleep;
+  unsigned minutes_asleep[60];
+} guard_t;
+
+typedef struct analyzed_sched{
+  size_t n_guards;
+  guard_t* a_guards;
+  sched_t* schedule;
+} analyzed_sched_t;
+
 int parse_entry(const char* s, entry_t* en);
 
 sched_t* parse_schedule(tok_t* tok);
 
 void free_sched(sched_t* schedule);
+
+void free_analyzed_sched(analyzed_sched_t* sched);
+
+analyzed_sched_t* analyze_schedule(tok_t* tok);
 
 char* most_asleep_guard(tok_t* tok);

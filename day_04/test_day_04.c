@@ -180,6 +180,14 @@ void test_parse_sched_single_guard_id_correct(void){
   free_tok(tok);
 }
 
+// Times:
+// Guard #2:
+//   1518-11-01/02: 00:07 - 00:18, 00:47 - 00:51
+// Guard #10:
+//   1518-11-01: 00:05 - 00:25 , 00:30 - 00:55
+//   1518-11-04: 00:07 - 00:41
+// Guard #167:
+//   1518-11-03: 00:22 - 00:25 , 00:31 - 00:33 , 00:39 - 00:41
 entry_t* multi_guard_expected_schedule(){
   entry_t* exp = malloc(20*sizeof(entry_t));
   exp[0] = (entry_t){(struct tm){0,5,0,1,10,-382,0,0,0,0,0},10,ASLEEP};
@@ -364,7 +372,277 @@ void test_parse_schedule_failed_parse_error_message(void){
   TEST_ASSERT_EQUAL_STRING("Failed to match action in "
                            "\"[1518-06-03 00:17] fallaaaaawers asleep\".", err);
   free(err);
-  free_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_sched_tok_null_returns_null(void){
+  analyzed_sched_t* res = analyze_schedule(NULL);
+  TEST_ASSERT_NULL(res);
+  char* err = get_latest_aoc_err_msg();
+  TEST_ASSERT_EQUAL_STRING("Tokenizer is NULL.", err);
+  free(err);
+}
+
+void test_analyze_schedule_failed_parse_error_message(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-06-03 00:17] fallaaaaawers asleep\n"
+    "[1518-11-01 00:55] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NULL(res);
+  char* err = get_latest_aoc_err_msg();
+  TEST_ASSERT_EQUAL_STRING("Failed to match action in "
+                           "\"[1518-06-03 00:17] fallaaaaawers asleep\".", err);
+  free(err);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_single_guard_single_shift_guardcount(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT(1u,res->n_guards);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_single_guard_single_shift_correct_id(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT(10u,res->a_guards[0].id);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_single_guard_single_shift_sched_not_null(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_NOT_NULL(res->schedule);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_single_guard_single_shift_sum_minutes_asleep(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT(45u,res->a_guards[0].total_minutes_asleep);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_single_guard_single_shift_minutes_asleep(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n";
+  unsigned exp[60] = {0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
+                      0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
+                      0,0,0,0};
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT_ARRAY(exp,res->a_guards[0].minutes_asleep,60);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_single_guard_multi_shift_sum_minutes_asleep(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-03 00:10] Guard #10 begins shift\n"
+    "[1518-11-03 00:13] falls asleep\n"
+    "[1518-11-03 00:29] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-03 00:26] wakes up\n"
+    "[1518-11-03 00:40] wakes up\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT(69u,res->a_guards[0].total_minutes_asleep);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_single_guard_multi_shift_minutes_asleep(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-03 00:10] Guard #10 begins shift\n"
+    "[1518-11-03 00:13] falls asleep\n"
+    "[1518-11-03 00:29] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-03 00:26] wakes up\n"
+    "[1518-11-03 00:40] wakes up\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n";
+  unsigned exp[60] = {0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0,
+                      0,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
+                      0,0,0,0};
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT_ARRAY(exp,res->a_guards[0].minutes_asleep,60);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_multi_guard_guardcount(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-03 00:22] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-02 00:47] falls asleep\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-03 00:39] falls asleep\n"
+    "[1518-11-02 00:18] wakes up\n"
+    "[1518-11-03 00:02] Guard #167 begins shift\n"
+    "[1518-11-04 00:02] Guard #10 begins shift\n"
+    "[1518-11-04 00:07] falls asleep\n"
+    "[1518-11-04 00:41] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n"
+    "[1518-11-03 00:33] wakes up\n"
+    "[1518-11-02 00:07] falls asleep\n"
+    "[1518-11-03 00:31] falls asleep\n"
+    "[1518-11-01 23:56] Guard #2 begins shift\n"
+    "[1518-11-03 00:41] wakes up\n"
+    "[1518-11-03 00:25] wakes up\n"
+    "[1518-11-02 00:51] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT(3u,res->n_guards);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_multi_guard_correct_id(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-03 00:22] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-02 00:47] falls asleep\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-03 00:39] falls asleep\n"
+    "[1518-11-02 00:18] wakes up\n"
+    "[1518-11-03 00:02] Guard #167 begins shift\n"
+    "[1518-11-04 00:02] Guard #10 begins shift\n"
+    "[1518-11-04 00:07] falls asleep\n"
+    "[1518-11-04 00:41] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n"
+    "[1518-11-03 00:33] wakes up\n"
+    "[1518-11-02 00:07] falls asleep\n"
+    "[1518-11-03 00:31] falls asleep\n"
+    "[1518-11-01 23:56] Guard #2 begins shift\n"
+    "[1518-11-03 00:41] wakes up\n"
+    "[1518-11-03 00:25] wakes up\n"
+    "[1518-11-02 00:51] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT(2u,res->a_guards[0].id);
+  TEST_ASSERT_EQUAL_UINT(10u,res->a_guards[1].id);
+  TEST_ASSERT_EQUAL_UINT(167u,res->a_guards[2].id);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_multi_guard_sum_minutes_asleep(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-03 00:22] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-02 00:47] falls asleep\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-03 00:39] falls asleep\n"
+    "[1518-11-02 00:18] wakes up\n"
+    "[1518-11-03 00:02] Guard #167 begins shift\n"
+    "[1518-11-04 00:02] Guard #10 begins shift\n"
+    "[1518-11-04 00:07] falls asleep\n"
+    "[1518-11-04 00:41] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n"
+    "[1518-11-03 00:33] wakes up\n"
+    "[1518-11-02 00:07] falls asleep\n"
+    "[1518-11-03 00:31] falls asleep\n"
+    "[1518-11-01 23:56] Guard #2 begins shift\n"
+    "[1518-11-03 00:41] wakes up\n"
+    "[1518-11-03 00:25] wakes up\n"
+    "[1518-11-02 00:51] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT(15u,res->a_guards[0].total_minutes_asleep);
+  TEST_ASSERT_EQUAL_UINT(79u,res->a_guards[1].total_minutes_asleep);
+  TEST_ASSERT_EQUAL_UINT(7u,res->a_guards[2].total_minutes_asleep);
+  free_analyzed_sched(res);
+  free_tok(tok);
+}
+
+void test_analyze_schedule_multi_guard_minutes_asleep(void){
+  char in[] = "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-03 00:22] falls asleep\n"
+    "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-02 00:47] falls asleep\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-03 00:39] falls asleep\n"
+    "[1518-11-02 00:18] wakes up\n"
+    "[1518-11-03 00:02] Guard #167 begins shift\n"
+    "[1518-11-04 00:02] Guard #10 begins shift\n"
+    "[1518-11-04 00:07] falls asleep\n"
+    "[1518-11-04 00:41] wakes up\n"
+    "[1518-11-01 00:55] wakes up\n"
+    "[1518-11-03 00:33] wakes up\n"
+    "[1518-11-02 00:07] falls asleep\n"
+    "[1518-11-03 00:31] falls asleep\n"
+    "[1518-11-01 23:56] Guard #2 begins shift\n"
+    "[1518-11-03 00:41] wakes up\n"
+    "[1518-11-03 00:25] wakes up\n"
+    "[1518-11-02 00:51] wakes up\n";
+  unsigned exp[3][60] = {{0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,
+                          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,
+                          0,0,0,0,0,0},
+                         {0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,
+                          1,1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                          1,0,0,0,0,0},
+                         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,
+                          0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                          0,0,0,0,0,0}
+  };
+  tok_t* tok = get_tokenizer(in, "\n");
+  analyzed_sched_t* res = analyze_schedule(tok);
+  TEST_ASSERT_NOT_NULL(res);
+  TEST_ASSERT_EQUAL_UINT_ARRAY(exp[0],res->a_guards[0].minutes_asleep,60);
+  TEST_ASSERT_EQUAL_UINT_ARRAY(exp[1],res->a_guards[1].minutes_asleep,60);
+  TEST_ASSERT_EQUAL_UINT_ARRAY(exp[2],res->a_guards[2].minutes_asleep,60);
+  free_analyzed_sched(res);
   free_tok(tok);
 }
 
@@ -406,6 +684,19 @@ int main(void){
   RUN_TEST(test_parse_sched_multi_guard_correct_entries);
   RUN_TEST(test_parse_sched_multi_guard_sorted_by_time);
   RUN_TEST(test_parse_schedule_failed_parse_error_message);
+  RUN_TEST(test_analyze_sched_tok_null_returns_null);
+  RUN_TEST(test_analyze_schedule_failed_parse_error_message);
+  RUN_TEST(test_analyze_schedule_single_guard_single_shift_guardcount);
+  RUN_TEST(test_analyze_schedule_single_guard_single_shift_correct_id);
+  RUN_TEST(test_analyze_schedule_single_guard_single_shift_sched_not_null);
+  RUN_TEST(test_analyze_schedule_single_guard_single_shift_sum_minutes_asleep);
+  RUN_TEST(test_analyze_schedule_single_guard_single_shift_minutes_asleep);
+  RUN_TEST(test_analyze_schedule_single_guard_multi_shift_sum_minutes_asleep);
+  RUN_TEST(test_analyze_schedule_single_guard_multi_shift_minutes_asleep);
+  RUN_TEST(test_analyze_schedule_multi_guard_guardcount);
+  RUN_TEST(test_analyze_schedule_multi_guard_correct_id);
+  RUN_TEST(test_analyze_schedule_multi_guard_sum_minutes_asleep);
+  RUN_TEST(test_analyze_schedule_multi_guard_minutes_asleep);
   RUN_TEST(test_part1_tok_null_returns_null);
   RUN_TEST(test_part1_empty_tok_returns_null);
   return UNITY_END();
