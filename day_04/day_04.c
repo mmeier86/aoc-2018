@@ -9,5 +9,5 @@
 #include <stddef.h>
 
 int main(int argc, char** argv){
-  return aoc_main(argc, argv, most_asleep_guard, NULL);
+  return aoc_main(argc, argv, most_asleep_guard, most_asleep_minute);
 }

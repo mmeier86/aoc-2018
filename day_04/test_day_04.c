@@ -690,6 +690,50 @@ void test_part1_aoc_example(void){
   free(res);
 }
 
+void test_part2_tok_null_returns_null(void){
+  char* res = most_asleep_minute(NULL);
+  TEST_ASSERT_NULL(res);
+  char* err = get_latest_aoc_err_msg();
+  TEST_ASSERT_EQUAL_STRING("Tokenizer is NULL.", err);
+  free(err);
+}
+
+void test_part2_empty_tok_returns_null(void){
+  char in[] = "\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  char* res = most_asleep_minute(tok);
+  TEST_ASSERT_NULL(res);
+  char* err = get_latest_aoc_err_msg();
+  TEST_ASSERT_EQUAL_STRING("Tokenizer is empty.", err);
+  free(err);
+  free_tok(tok);
+}
+
+void test_part2_aoc_example(void){
+  char in[] = "[1518-11-01 00:00] Guard #10 begins shift\n"
+    "[1518-11-01 00:05] falls asleep\n"
+    "[1518-11-01 00:25] wakes up\n"
+    "[1518-11-01 00:30] falls asleep\n"
+    "[1518-11-01 00:55] wakes up\n"
+    "[1518-11-01 23:58] Guard #99 begins shift\n"
+    "[1518-11-02 00:40] falls asleep\n"
+    "[1518-11-02 00:50] wakes up\n"
+    "[1518-11-03 00:05] Guard #10 begins shift\n"
+    "[1518-11-03 00:24] falls asleep\n"
+    "[1518-11-03 00:29] wakes up\n"
+    "[1518-11-04 00:02] Guard #99 begins shift\n"
+    "[1518-11-04 00:36] falls asleep\n"
+    "[1518-11-04 00:46] wakes up\n"
+    "[1518-11-05 00:03] Guard #99 begins shift\n"
+    "[1518-11-05 00:45] falls asleep\n"
+    "[1518-11-05 00:55] wakes up\n";
+  tok_t* tok = get_tokenizer(in, "\n");
+  char* res = most_asleep_minute(tok);
+  TEST_ASSERT_EQUAL_STRING("4455",res);
+  free_tok(tok);
+  free(res);
+}
+
 int main(void){
   UNITY_BEGIN();
   RUN_TEST(test_parse_entry_null_string_returns_error);
@@ -725,5 +769,8 @@ int main(void){
   RUN_TEST(test_part1_tok_null_returns_null);
   RUN_TEST(test_part1_empty_tok_returns_null);
   RUN_TEST(test_part1_aoc_example);
+  RUN_TEST(test_part2_tok_null_returns_null);
+  RUN_TEST(test_part2_empty_tok_returns_null);
+  RUN_TEST(test_part2_aoc_example);
   return UNITY_END();
 }

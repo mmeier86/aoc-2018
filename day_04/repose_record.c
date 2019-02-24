@@ -332,3 +332,38 @@ char* most_asleep_guard(tok_t* tok){
   free_analyzed_sched(sched);
   return res;
 }
+
+char* most_asleep_minute(tok_t* tok){
+  if(tok == NULL){
+    set_aoc_err_msg("Tokenizer is NULL.", 0);
+    return NULL;
+  }
+  if(tok_count(tok) == 0){
+    set_aoc_err_msg("Tokenizer is empty.", 0);
+    return NULL;
+  }
+  analyzed_sched_t* sched = analyze_schedule(tok);
+  if(sched == NULL){
+    return NULL;
+  }
+  guard_t* worst_guard = sched->a_guards;
+  unsigned most_asleep_min = 0;
+  for(size_t i = 0; i < sched->n_guards; i++){
+    for(size_t k = 0; k < 60; k++){
+      if(sched->a_guards[i].minutes_asleep[k] > worst_guard->minutes_asleep[most_asleep_min]){
+        worst_guard = &sched->a_guards[i];
+        most_asleep_min = k;
+      }
+    }
+  }
+  unsigned n = worst_guard->id * most_asleep_min;
+  unsigned counter = 0;
+  while(n != 0){
+    n /= 10;
+    counter++;
+  }
+  char* res = malloc(counter+2);
+  snprintf(res,counter+2,"%u",worst_guard->id * most_asleep_min);
+  free_analyzed_sched(sched);
+  return res;
+}

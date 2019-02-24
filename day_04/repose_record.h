@@ -46,3 +46,5 @@ void free_analyzed_sched(analyzed_sched_t* sched);
 analyzed_sched_t* analyze_schedule(tok_t* tok);
 
 char* most_asleep_guard(tok_t* tok);
+
+char* most_asleep_minute(tok_t* tok);
